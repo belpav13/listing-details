@@ -56,7 +56,7 @@ public class CSVController {
     }
 
     @GetMapping("/listings")
-    public ResponseEntity<DetailsEntity> getDetailsByQuery(RequestDTO requestDTO) {
+    public ResponseEntity<DetailsEntity> getDetailsByQuery(@RequestBody RequestDTO requestDTO) {
         try {
             List<DetailsEntity> detailsEntities = fileService.getAllDetails();
 
