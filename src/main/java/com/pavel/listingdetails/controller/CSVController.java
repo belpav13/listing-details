@@ -1,5 +1,6 @@
 package com.pavel.listingdetails.controller;
 
+import com.pavel.listingdetails.dto.RequestDTO;
 import com.pavel.listingdetails.helper.CSVHelper;
 import com.pavel.listingdetails.message.ResponseMessage;
 import com.pavel.listingdetails.model.DetailsEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/csv")
@@ -48,6 +50,27 @@ public class CSVController {
             }
 
             return new ResponseEntity<>(detailsEntity, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/listings")
+    public ResponseEntity<DetailsEntity> getDetailsByQuery(RequestDTO requestDTO) {
+        try {
+            List<DetailsEntity> detailsEntities = fileService.getAllDetails();
+
+            if (detailsEntities.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            detailsEntities = detailsEntities.stream()
+                    .filter(d -> d.getPrice() > requestDTO.getMinPrice())
+                    .filter(d -> d.getPrice() < requestDTO.getMaxPrice())
+                    .filter(d -> d.getPrice() > requestDTO.getMinMinCpm())
+                    .filter(d -> d.getPrice() < requestDTO.getMaxMaxCpm())
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity(detailsEntities, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
